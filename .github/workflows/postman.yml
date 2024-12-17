@@ -30,7 +30,7 @@ jobs:
       - name: Start API Server
         run: |
           node app.js &  
-          sleep 5  
+          sleep 10  
 
       # Step 5: Run Postman collection with Newman
       - name: Run Postman collection with Newman
