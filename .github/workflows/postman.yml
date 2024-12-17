@@ -35,4 +35,4 @@ jobs:
       # Step 5: Run Postman collection with Newman
       - name: Run Postman collection with Newman
         run: |
-          npx newman run "Authentication_database.postman_collection.json"
+          npx newman run "C:\Users\Home\Desktop\Sviatlanos darbai\QA\2024-12-12 Authentication_Express API\Authentication_database.postman_collection.json"
