@@ -1,0 +1,1527 @@
+{
+	"info": {
+		"_postman_id": "a72da973-7d25-4403-b8d0-d93bf9aa6c42",
+		"name": "Authentication_database",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39912236"
+	},
+	"item": [
+		{
+			"name": "1. Register New User",
+			"item": [
+				{
+					"name": "1.1 Successful Registration",
+					"item": [
+						{
+							"name": "1.1.1 Successful New User Registration",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique email using a timestamp\r",
+											"const timestamp = new Date().getTime();\r",
+											"const uniqueEmail = `user_${timestamp}@example.com`;\r",
+											"\r",
+											"// Generate random surname and title\r",
+											"const surnames = ['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson'];\r",
+											"const titles = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof'];\r",
+											"const randomSurname = surnames[Math.floor(Math.random() * surnames.length)];\r",
+											"const randomTitle = titles[Math.floor(Math.random() * titles.length)];\r",
+											"\r",
+											"// Define a password (can also be randomly generated if needed)\r",
+											"const password = 'Password123';\r",
+											"\r",
+											"// Set variables for use in the request body\r",
+											"pm.collectionVariables.set('emailForRegistration', uniqueEmail);\r",
+											"pm.collectionVariables.set('surnameForRegistration', randomSurname);\r",
+											"pm.collectionVariables.set('titleForRegistration', randomTitle);\r",
+											"pm.collectionVariables.set('passwordForRegistration', password);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 201\", function () {\r",
+											"  pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"User registered successfully\");\r",
+											"}); \r",
+											"\r",
+											"\r",
+											"pm.test(\"Response is an object and has the required fields with correct data types\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.user).to.have.property('id').that.is.a('number');\r",
+											"    pm.expect(responseData.user).to.have.property('email').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('surname').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('title').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('password').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('created_at').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('updated_at').that.is.a('string');\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"User registration data matches the database records\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const expectedEmail = pm.collectionVariables.get(\"emailForRegistration\");\r",
+											"    const expectedSurname = pm.collectionVariables.get(\"surnameForRegistration\");\r",
+											"    const expectedTitle = pm.collectionVariables.get(\"titleForRegistration\");\r",
+											"\r",
+											"    pm.expect(responseData.user.email).to.eql(expectedEmail);\r",
+											"    pm.expect(responseData.user.surname).to.eql(expectedSurname);\r",
+											"    pm.expect(responseData.user.title).to.eql(expectedTitle);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"User's password in the database is not equal to the one entered during registration (hashed)\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const expectedPassword = pm.collectionVariables.get(\"passwordForRegistration\");\r",
+											"\r",
+											"    pm.expect(responseData.user.password).to.not.eql(expectedPassword);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"User registration time ('created_at') in database is correct\", function () {\r",
+											"    const userData = pm.response.json().user;\r",
+											"    const registrationTimeUTC = new Date(userData.created_at);\r",
+											"    const currentLocalTime = new Date();\r",
+											"    const timeDiffference = Math.abs(registrationTimeUTC - currentLocalTime);\r",
+											"    console.log(timeDiffference)\r",
+											"\r",
+											"    pm.expect(timeDiffference).to.be.below(6000);  \r",
+											"});\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"{{emailForRegistration}}\",\r\n  \"surname\": \"{{surnameForRegistration}}\",\r\n  \"title\": \"{{titleForRegistration}}\",\r\n  \"password\": \"{{passwordForRegistration}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "1.2 Unsusccessful Registration",
+					"item": [
+						{
+							"name": "1.2.1 Unsuccessful Registration_Title is Empty",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(400);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.is.a('string').and.to.be.eql(\"All fields are required\")\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											"\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"bach@gmail.com\",\r\n  \"surname\": \"Bach\",\r\n  \"title\": \"\",\r\n  \"password\": \"Password123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "1.2.2 Unsuccessful Registration with Existing Email",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Check if an email already exists in collectionVariables\r",
+											"let existingEmail = pm.collectionVariables.get('emailForRegistration');\r",
+											"\r",
+											"if (!existingEmail) {\r",
+											"    // Generate a new unique email and store it for the first successful registration\r",
+											"    const timestamp = new Date().getTime();\r",
+											"    const uniqueEmail = `user_${timestamp}@example.com`;\r",
+											"    pm.collectionVariables.set('emailForRegistration', uniqueEmail);\r",
+											"\r",
+											"    // Generate random surname and title\r",
+											"    const surnames = ['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson'];\r",
+											"    const titles = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof'];\r",
+											"    const randomSurname = surnames[Math.floor(Math.random() * surnames.length)];\r",
+											"    const randomTitle = titles[Math.floor(Math.random() * titles.length)];\r",
+											"\r",
+											"    // Define password\r",
+											"    const password = 'Password123';\r",
+											"\r",
+											"    // Store data for successful registration\r",
+											"    pm.collectionVariables.set('surnameForRegistration', randomSurname);\r",
+											"    pm.collectionVariables.set('titleForRegistration', randomTitle);\r",
+											"    pm.collectionVariables.set('passwordForRegistration', password);\r",
+											"} else {\r",
+											"    // If email already exists, reuse it for the failing registration\r",
+											"    console.log('Reusing existing email for failing registration:', existingEmail);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 500\", function () {\r",
+											"  pm.expect(pm.response.code).to.equal(500);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.a('string').and.to.be.eql(\"Error registering user\")\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below (1000);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"{{emailForRegistration}}\",\r\n  \"surname\": \"{{surnameForRegistration}}\",\r\n  \"title\": \"{{titleForRegistration}}\",\r\n  \"password\": \"{{passwordForRegistration}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "1.2.3 Unsuccessful User Registration with Surname of 300 Characters",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique email using a timestamp\r",
+											"const timestamp = new Date().getTime();\r",
+											"const uniqueEmail = `user_${timestamp}@example.com`;\r",
+											"\r",
+											"// Generate random surname and title\r",
+											"const surname = 'Password123dddddddddddddddddddddddddddddddkkkkkkksbbbbbbbbbbbbaahddddddddddddddddddddddddddddddddddddddddddddddddddd57832402slfjhukzsegysjkdhvbhGFUYAWEKJSHNRLTJKSFkjfxhvudfgjfbdfxl;ogjdnd.zklhzuinfbdsfzjhgvjvndz.fdlkdfbzlkniURFRKN<JGNBKLJDBVJHDBVDK>JFNKJDBdjhVBJHDFBGHDFszkdjghRGFDJ<BVDFLKjzklnzbvjgf';\r",
+											"const titles = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof'];\r",
+											"\r",
+											"const randomTitle = titles[Math.floor(Math.random() * titles.length)];\r",
+											"\r",
+											"// Define a password (can also be randomly generated if needed)\r",
+											"const password = 'Password123';\r",
+											"\r",
+											"// Set variables for use in the request body\r",
+											"pm.collectionVariables.set('emailForRegistration2', uniqueEmail);\r",
+											"pm.collectionVariables.set('surnameForRegistration2', surname);\r",
+											"pm.collectionVariables.set('titleForRegistration2', randomTitle);\r",
+											"pm.collectionVariables.set('passwordForRegistration2', password);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 500\", function () {\r",
+											"  pm.response.to.have.status(500);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Error registering user\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"{{emailForRegistration2}}\",\r\n  \"surname\": \"{{surnameForRegistration2}}\",\r\n  \"title\": \"{{titleForRegistration2}}\",\r\n  \"password\": \"{{passwordForRegistration2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2. Login",
+			"item": [
+				{
+					"name": "2.1 Successful Login",
+					"item": [
+						{
+							"name": "2.1.1 Register Unique New User for Login",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const loginTimestamp = new Date().getTime();\r",
+											"const loginEmail = `login_${loginTimestamp}@example.com`;\r",
+											"\r",
+											"// Generate random surname and title for login\r",
+											"const surnames = ['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson'];\r",
+											"const titles = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof'];\r",
+											"const loginSurname = surnames[Math.floor(Math.random() * surnames.length)];\r",
+											"const loginTitle = titles[Math.floor(Math.random() * titles.length)];\r",
+											"\r",
+											"// Define a fixed password for login (can also be randomized)\r",
+											"const loginPassword = 'LoginPassword123';\r",
+											"\r",
+											"// Set variables for use in the login request\r",
+											"pm.collectionVariables.set('emailForLogin', loginEmail);\r",
+											"pm.collectionVariables.set('surnameForLogin', loginSurname);\r",
+											"pm.collectionVariables.set('titleForLogin', loginTitle);\r",
+											"pm.collectionVariables.set('passwordForLogin', loginPassword);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"{{emailForLogin}}\",\r\n  \"surname\": \"{{surnameForLogin}}\",\r\n  \"title\": \"{{titleForLogin}}\",\r\n  \"password\": \"{{passwordForLogin}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2.1.2 Successful Login with Unique User for Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is an object and has the required fields with correct data types\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData).to.have.property('message').that.is.a('string');\r",
+											"    pm.expect(responseData).to.have.property('token').that.is.a('string');\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Login successful\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 500ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"{{emailForLogin}}\",\r\n  \"password\": \"{{passwordForLogin}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "2.2 Unsuccessful Login",
+					"item": [
+						{
+							"name": "2.2.1 Unsuccessful Login with Use of Wrong Email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 401\", function () {\r",
+											"  pm.response.to.have.status(401);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Invalid email or password\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"john.travolta@example.com\",\r\n  \"password\": \"{{passwordForLogin}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2.2.2 Unsuccessful Login without Password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Email and password are required\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"unsuccessfulUpdate@example.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3. Update User Info",
+			"item": [
+				{
+					"name": "3.1 Successful Update",
+					"item": [
+						{
+							"name": "3.1.1 Register Unique New User for Update",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique email for update scenario\r",
+											"const updateTimestamp = new Date().getTime();\r",
+											"const updateEmail = `update_${updateTimestamp}@example.com`;\r",
+											"\r",
+											"// Generate random surname and title for update\r",
+											"const surnames = ['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson'];\r",
+											"const updateSurname = surnames[Math.floor(Math.random() * surnames.length)];\r",
+											"\r",
+											"\r",
+											"// Define a password for update scenario (can be randomized if needed)\r",
+											"const updatePassword = 'UpdatePassword123';\r",
+											"\r",
+											"// Set variables for use in the update request\r",
+											"pm.collectionVariables.set('emailForUpdate', updateEmail);\r",
+											"pm.collectionVariables.set('surnameForUpdate', updateSurname);\r",
+											"pm.collectionVariables.set(\"originalTitle\", \"Mr\")\r",
+											"pm.collectionVariables.set('passwordForUpdate', updatePassword);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Extract user ID from response\", function () {\r",
+											"    const response = pm.response.json(); \r",
+											"    pm.expect(response.user).to.have.property('id'); \r",
+											"\r",
+											"    const userId = response.user.id; \r",
+											"    pm.collectionVariables.set('userIdForUpdate', userId);\r",
+											"    console.log('User ID saved to collection variable:', userId);\r",
+											"});\r",
+											"\r",
+											"const user = pm.response.json().user;\r",
+											"pm.collectionVariables.set(\"originalCreatedAt\", user.created_at);\r",
+											"console.log(\"Saved created_at:\", user.created_at);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate}}\",\r\n\"surname\": \"{{surnameForUpdate}}\",\r\n\"title\" :\"{{titleForUpdate}}\",\r\n\"password\" :\"{{passwordForUpdate}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.1.2 Login with User for Update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {\r",
+											"    const response = pm.response.json();\r",
+											"    if (response.token) {\r",
+											"        // Save token to collection variable\r",
+											"        pm.collectionVariables.set('tokenForUpdate', response.token);\r",
+											"        console.log('Token saved:', response.token);\r",
+											"    } else {\r",
+											"        console.error('Token not found in the response');\r",
+											"    }\r",
+											"} else {\r",
+											"    console.error('Login failed:', pm.response.status);\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate}}\",\r\n\"password\" :\"{{passwordForUpdate}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.1.3 Update Title",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is an object and has the required fields with correct data types\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.user).to.have.property('id').that.is.a('number');\r",
+											"    pm.expect(responseData.user).to.have.property('email').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('surname').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('title').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('password').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('created_at').that.is.a('string');\r",
+											"    pm.expect(responseData.user).to.have.property('updated_at').that.is.a('string');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"User updated successfully\");\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"User update time ('updated_at') in database is correct\", function () {\r",
+											"    const userData = pm.response.json().user;\r",
+											"    const updateTimeUTC = new Date(userData.updated_at); \r",
+											"    const currentLocalTime = new Date(); \r",
+											"    const timeDifference = Math.abs(updateTimeUTC - currentLocalTime); \r",
+											"    console.log(\"Time Difference (in ms): \", timeDifference);\r",
+											"    pm.expect(timeDifference).to.be.below(6000);  // 6 sec\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verify that time at 'created_at' field remains unchanged after update\", function () {\r",
+											"    \r",
+											"    const responseData = pm.response.json().user;\r",
+											"    const originalCreatedAt = pm.collectionVariables.get(\"originalCreatedAt\");\r",
+											"\r",
+											"    pm.expect(responseData.created_at).to.eql(originalCreatedAt);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Verify that title has been updated and is saved in database\", function () {\r",
+											"    const responseData = pm.response.json().user;\r",
+											"    const originalTitle = pm.collectionVariables.get(\"originalTitle\");\r",
+											"    const newTitle = pm.collectionVariables.get(\"titleForUpdate\");\r",
+											"\r",
+											"    pm.expect(responseData.title).to.eql(newTitle);\r",
+											"    pm.expect(responseData.title).to.not.eql(originalTitle);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{tokenForUpdate}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate}}\",\r\n\"surname\": \"{{surnameForUpdate}}\",\r\n\"title\" :\"Frau\",\r\n\"password\" :\"{{passwordForUpdate}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/users/{{userIdForUpdate}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"users",
+										"{{userIdForUpdate}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "3.2 Unsuccessful Update",
+					"item": [
+						{
+							"name": "3.2.1 Register User for Unsuccessful Update",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique email for update scenario\r",
+											"const updateTimestamp = new Date().getTime();\r",
+											"const updateEmail = `update_${updateTimestamp}@example.com`;\r",
+											"\r",
+											"// Generate random surname and title for update\r",
+											"const surnames = ['Smith', 'Johnson', 'Brown', 'Taylor', 'Anderson'];\r",
+											"const titles = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof'];\r",
+											"const updateSurname = surnames[Math.floor(Math.random() * surnames.length)];\r",
+											"const updateTitle = titles[Math.floor(Math.random() * titles.length)];\r",
+											"\r",
+											"// Define a password for update scenario (can be randomized if needed)\r",
+											"const updatePassword = 'UpdatePassword123';\r",
+											"\r",
+											"// Set variables for use in the update request\r",
+											"pm.collectionVariables.set('emailForUpdate2', updateEmail);\r",
+											"pm.collectionVariables.set('surnameForUpdate2', updateSurname);\r",
+											"pm.collectionVariables.set('titleForUpdate2', updateTitle);\r",
+											"pm.collectionVariables.set('passwordForUpdate2', updatePassword);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Extract user ID from response\", function () {\r",
+											"    const response = pm.response.json(); \r",
+											"    pm.expect(response.user).to.have.property('id'); \r",
+											"\r",
+											"    const userId = response.user.id; \r",
+											"    pm.collectionVariables.set('userIdForUpdate2', userId);\r",
+											"    console.log('User ID saved to collection variable:', userId);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate2}}\",\r\n\"surname\": \"{{surnameForUpdate2}}\",\r\n\"title\" :\"{{titleForUpdate2}}\",\r\n\"password\" :\"{{passwordForUpdate2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.2.2 Login with User for Unsuccessful Update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test Script for saving token\r",
+											"if (pm.response.code === 200) {\r",
+											"    const response = pm.response.json();\r",
+											"    if (response.token) {\r",
+											"        // Save token to collection variable\r",
+											"        pm.collectionVariables.set('tokenForUpdate2', response.token);\r",
+											"        console.log('Token saved:', response.token);\r",
+											"    } else {\r",
+											"        console.error('Token not found in the response');\r",
+											"    }\r",
+											"} else {\r",
+											"    console.error('Login failed:', pm.response.status);\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate2}}\",\r\n\"password\" :\"{{passwordForUpdate2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.2.3 Update User without Email and Title",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 400\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Email or title is required to update\");\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response time is less than 500ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{tokenForUpdate2}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"surname\": \"{{surnameForUpdate2}}\",\r\n\"password\" :\"{{passwordForUpdate2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/users/{{userIdForUpdate2}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"users",
+										"{{userIdForUpdate2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.2.4 Unsuccessful Update with Fake ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 404\", function () {\r",
+											"  pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"User not found\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{tokenForUpdate2}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate2}}\",\r\n\"surname\": \"{{surnameForUpdate2}}\",\r\n\"title\" :\"{{titleForUpdate2}}\",\r\n\"password\" :\"{{passwordForUpdate2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/users/000000",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"users",
+										"000000"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.2.5 Update User's Email to an Existing one",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 500\", function () {\r",
+											"  pm.response.to.have.status(500);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Error updating user\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											"\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{tokenForUpdate2}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"{{emailForRegistration}}\",\r\n  \"surname\": \"{{surnameForUpdate}}\",\r\n  \"title\": \"{{titleForUpdate}}\",\r\n  \"password\": \"{{passwordForUpdate}}\"\r\n}\r\n\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/users/{{userId}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"users",
+										"{{userId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.2.6. Unsuccessful Update_No Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 401\", function () {\r",
+											"  pm.response.to.have.status(401);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Unauthorized\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "//without token\r\n{\r\n\"email\":\"{{emailForUpdate2}}\",\r\n\"surname\": \"{{surnameForUpdate2}}\",\r\n\"title\" :\"{{titleForUpdate2}}\",\r\n\"password\" :\"{{passwordForUpdate2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/users/{{userIdForUpdate2}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"users",
+										"{{userIdForUpdate2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3.2.6. Unsuccessful Update_Invalid Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 403\", function () {\r",
+											"  pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Response message exists and is correct\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(responseData).to.be.an('object');\r",
+											"    pm.expect(responseData.message).to.exist.and.to.be.eq(\"Forbidden\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is less than 1000ms\", function () {\r",
+											"  pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "invalid-token",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n{\r\n\"email\":\"{{emailForUpdate2}}\",\r\n\"surname\": \"{{surnameForUpdate2}}\",\r\n\"title\" :\"{{titleForUpdate2}}\",\r\n\"password\" :\"{{passwordForUpdate2}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/users/{{userIdForUpdate2}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"users",
+										"{{userIdForUpdate2}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "emailForRegistration",
+			"value": ""
+		},
+		{
+			"key": "surnameForRegistration",
+			"value": ""
+		},
+		{
+			"key": "titleForRegistration",
+			"value": ""
+		},
+		{
+			"key": "passwordForRegistration",
+			"value": ""
+		},
+		{
+			"key": "emailForRegistration2",
+			"value": ""
+		},
+		{
+			"key": "surnameForRegistration2",
+			"value": ""
+		},
+		{
+			"key": "titleForRegistration2",
+			"value": ""
+		},
+		{
+			"key": "passwordForRegistration2",
+			"value": ""
+		},
+		{
+			"key": "emailForLogin",
+			"value": ""
+		},
+		{
+			"key": "surnameForLogin",
+			"value": ""
+		},
+		{
+			"key": "titleForLogin",
+			"value": ""
+		},
+		{
+			"key": "passwordForLogin",
+			"value": ""
+		},
+		{
+			"key": "emailForUpdate",
+			"value": ""
+		},
+		{
+			"key": "surnameForUpdate",
+			"value": ""
+		},
+		{
+			"key": "titleForUpdate",
+			"value": ""
+		},
+		{
+			"key": "passwordForUpdate",
+			"value": ""
+		},
+		{
+			"key": "userIdForUpdate",
+			"value": ""
+		},
+		{
+			"key": "tokenForUpdate",
+			"value": ""
+		},
+		{
+			"key": "emailForUpdate2",
+			"value": ""
+		},
+		{
+			"key": "surnameForUpdate2",
+			"value": ""
+		},
+		{
+			"key": "titleForUpdate2",
+			"value": ""
+		},
+		{
+			"key": "passwordForUpdate2",
+			"value": ""
+		},
+		{
+			"key": "userIdForUpdate2",
+			"value": ""
+		},
+		{
+			"key": "tokenForUpdate2",
+			"value": ""
+		},
+		{
+			"key": "emailForLogin500",
+			"value": ""
+		},
+		{
+			"key": "passwordForLogin500",
+			"value": ""
+		},
+		{
+			"key": "originalCreatedAt",
+			"value": ""
+		},
+		{
+			"key": "originalTitle",
+			"value": ""
+		}
+	]
+}
