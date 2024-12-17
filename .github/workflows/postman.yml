@@ -1,40 +1,40 @@
-
-        name: CI - Run Postman Tests
+name: Run Postman Tests with Newman
 
 on:
   push:
     branches:
-      - master
+      - master  
   pull_request:
-        branches:
-      - master
+    branches:
+      - master  
 
 jobs:
-  postman-tests:
+  newman-run:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      # Step 2: Set up Node.js
+    
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "22"
+          node-version: '22.12.0' 
 
-      # Step 3: Install dependencies
+    
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Start the API server
+      
       - name: Start API Server
         run: |
-          node app.js &
-          sleep 5 # Wait for the server to start
+          node app.js &  
+          sleep 5  
 
-      # Step 5: Run Postman tests with Newman
-      - name: Run Postman tests with Newman
+      # Step 5: Run Postman collection with Newman
+      - name: Run Postman collection with Newman
         run: |
-          npx newman run "Authentication_database.postman_collection" --reporters cli
+          npx newman run "2024-12-12 Authentication_Express API/Authentication_database.postman_collection.json" \
+            --env-var "tokenForUpdate=${{ secrets.TOKEN_FOR_UPDATE }}" \
+            --env-var "tokenForUpdate2=${{ secrets.TOKEN_FOR_UPDATE2 }}"
