@@ -21,7 +21,6 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -40,12 +39,81 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run database migrations
+        run: npx sequelize-cli db:migrate 
+
       - name: Start API Server
         run: |
           node app.js &  
           sleep 10
 
-      # Step 5: Run Postman collection with Newman
       - name: Run Postman collection with Newman
         run: |
           npx newman run Authentication_database.postman_collection.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# name: Run Postman Tests with Newman
+
+# on:
+#   push:
+#     branches:
+#       - master
+#   pull_request:
+#     branches:
+#       - master
+
+# jobs:
+#   newman-run:
+#     runs-on: ubuntu-latest
+
+#     services:
+#       postgres:
+#         image: postgres:latest
+#         env:
+#           POSTGRES_DB: authentication_db
+#           POSTGRES_PASSWORD: postgres
+#           POSTGRES_USER: postgres
+#         ports:
+#           - 5432:5432
+#         # Set health checks to wait until postgres has started
+#         options: >-
+#           --health-cmd pg_isready
+#           --health-interval 10s
+#           --health-timeout 5s
+#           --health-retries 5
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: "22.12.0"
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Start API Server
+#         run: |
+#           node app.js &  
+#           sleep 10
+
+#       # Step 5: Run Postman collection with Newman
+#       - name: Run Postman collection with Newman
+#         run: |
+#           npx newman run Authentication_database.postman_collection.json
