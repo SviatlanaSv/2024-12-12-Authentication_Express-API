@@ -39,8 +39,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run database migrations
-        run: npx sequelize-cli db:migrate
+      - name: Run SQL Script
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d authentication_db -f ./sql/schema.sql  
 
       - name: Start API Server
         run: |
