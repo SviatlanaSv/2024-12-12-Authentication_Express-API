@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "newman run Authentication_database.postman_collection.json",
+    "test": "npx newman run \"Authentication_database.postman_collection.json\"",
     "dev": "nodemon app.js"
   },
   "keywords": [],
