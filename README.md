@@ -104,7 +104,7 @@ The Postman collection (`Authentication_database.postman_collection.json`) inclu
 - User login.
 - JWT authentication for secured routes.
 
-```{
+(```{
   "message": "User registered successfully",
   "user": {
     "id": 1,
@@ -114,7 +114,7 @@ The Postman collection (`Authentication_database.postman_collection.json`) inclu
     "created_at": "2025-01-14T12:00:00.000Z",
     "updated_at": "2025-01-14T12:00:00.000Z"
   }
-}```
+}```)
 
 
 ---
