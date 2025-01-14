@@ -706,7 +706,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n\"email\":\"{{emailForUpdate}}\",\r\n\"surname\": \"{{surnameForUpdate}}\",\r\n\"title\" :\"{{titleForUpdate}}\",\r\n\"password\" :\"{{passwordForUpdate}}\"\r\n}",
+									"raw": "{\r\n\"email\":\"{{emailForUpdate}}\",\r\n\"surname\": \"{{surnameForUpdate}}\",\r\n\"title\" :\"{{originalTitle}}\",\r\n\"password\" :\"{{passwordForUpdate}}\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -795,6 +795,8 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"const newTitle = 'Frau';\r",
+											"pm.collectionVariables.set(\"titleForUpdate\", newTitle)\r",
 											""
 										],
 										"type": "text/javascript",
