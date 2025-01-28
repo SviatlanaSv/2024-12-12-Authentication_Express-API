@@ -36,6 +36,7 @@ To get started with this project locally, follow these steps:
 
 ```bash
 git clone https://github.com/SviatlanaSv/2024-12-12-Authentication_Express-API.git
+cd 2024-12-12-Authentication_Express-API
 ```
 
 2. **Install dependencies**
